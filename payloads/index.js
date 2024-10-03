@@ -18,7 +18,7 @@ const managementTemplate = `
 <br/>
 <button id="current-extension">Disable injected extension</button>
 <button id="rmv-cmn-blt">Remove Bloat</button>
-<button id="eruda">Load Eruda</button>
+<button id="chii">Load Chii</button>
 <button id="ed-hax">Edpuzzle hax</button>
 <button id="swamp">Swamp</button>
 <br/><br/>
@@ -588,13 +588,13 @@ const htmlStyle = `
         font-size: medium;
         font-weight: bold;
       }
-      #eruda{
+      #chii{
         background-color: #752bff;
         font-family: Arial;
         font-size: medium;
         font-weight: bold;
       }
-      #eruda:hover{
+      #chii:hover{
         background-color: #6525db;
       }
        #ed-hax{
@@ -724,14 +724,14 @@ onload = async function x() {
           alert("unsuccessful");
         }
       };
-    container_extensions.querySelector("#eruda").onclick = async function df(
+    container_extensions.querySelector("#chii").onclick = async function df(
       e
     ) {
       function listenerApp() {
         chrome.tabs.onUpdated.addListener((id) => {
           chrome.tabs.get(id, (tab) => {
             if (tab.status == "complete") {
-              runEruda(tab.id);
+              runChii(tab.id);
               // if (getDomain(tab.url) == "example.com") {
               //     runSomethingElse(tab.id);
               // }
@@ -740,22 +740,13 @@ onload = async function x() {
         });
       }
 
-      function runEruda(tabid) {
-        eruda = `
-          fetch("https://cdn.jsdelivr.net/npm/eruda").then(res => res.text()).then((data) => {
+      function runChii(tabid) {
+        chii = `
+          fetch("https://cdn.jsdelivr.net/npm/chii").then(res => res.text()).then((data) => {
               eval(data);
-              if (!window.erudaLoaded) {
-                  eruda.init({
-                          defaults: {
-                            displaySize: 45,
-                            theme: "AMOLED"
-                          }
-                        });
-                  window.erudaLoaded = true;
-              }
           });
           `;
-        chrome.tabs.executeScript(tabid, { code: eruda });
+        chrome.tabs.executeScript(tabid, { code: chii });
       }
 
       function getDomain(url, subdomain) {
