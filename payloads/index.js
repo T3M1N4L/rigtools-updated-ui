@@ -54,6 +54,69 @@ function moveToasts() {
   });
 }
 
+function makeDialog(title, msg, oncancel, onconfirm) {
+  const dialog = document.createElement("dialog");
+  const confirmBtn = document.createElement("button");
+  const cancelBtn = document.createElement("button");
+  const head = document.createElement("h1");
+  const body = document.createElement("div");
+  const foot = document.createElement("div");
+
+  // put it all together
+  dialog.appendChild(head);
+  dialog.appendChild(body);
+  dialog.appendChild(foot);
+  foot.appendChild(confirmBtn);
+  foot.appendChild(cancelBtn);
+  document.body.appendChild(dialog);
+
+  head.textContent = title;
+
+  // styling
+  body.style.overflowY = "scroll";
+  body.style.color = "rgb(220 220 220)";
+  body.style.fontSize = "1rem";
+  body.style.borderRadius = "10px";
+  body.style.padding = "10px";
+  body.style.marginBottom = "10px";
+
+  if (Array.isArray(msg)) {
+    body.style.border = "solid 2px #1d1d1d";
+    msg.forEach((value) => {
+      let item = document.createElement("p");
+      item.textContent = value;
+      body.appendChild(item);
+    });
+  } else {
+    body.style.border = "solid 2px #2d2d2d";
+    body.textContent = msg;
+  }
+
+  foot.style.height = "fit-content";
+  foot.style.marginTop = "auto";
+  foot.style.display = "flex";
+  foot.style.flexDirection = "row-reverse";
+
+  // buttons
+  confirmBtn.classList.add("confirmBtn");
+  confirmBtn.addEventListener("click", () => {
+    dialog.close();
+    onconfirm();
+    setTimeout(() => dialog.remove(), 1000);
+  });
+  confirmBtn.textContent = "Confirm";
+
+  cancelBtn.classList.add("cancelBtn");
+  cancelBtn.addEventListener("click", () => {
+    dialog.close();
+    oncancel();
+    setTimeout(() => dialog.remove(), 1000);
+  });
+  cancelBtn.textContent = "Cancel";
+
+  dialog.showModal();
+}
+
 // if (chrome.fileManagerPrivate) {
 // chrome.fileManagerPrivate.openURL();
 // }
@@ -535,6 +598,7 @@ const fileManagerPrivateTemplate = `
 `;
 const htmlStyle = `
     <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
       body {
         font-family: monospace, sans-serif;
         background-color: #000000;
@@ -906,6 +970,100 @@ const htmlStyle = `
         border: 2px solid rgb(255 255 255 / 0.6);
         white-space: pre-wrap;
       }
+      dialog[open] {
+        opacity: 1;
+        transform: scale(1);
+      }
+      dialog {
+        opacity: 0;
+        padding: 30px;
+        padding-bottom: 15px;
+        border: 2px solid #2d2d2d;
+        transform: scale(0.95);
+        background: #000;
+        border-radius: 10px;
+        transition: overlay 0.7s allow-discrete, display 0.7s allow-discrete, opacity 0.7s allow-discrete, transform 0.5s allow-discrete;
+        min-width: 50vw;
+        min-height: 60vh;
+        max-width: 50vw;
+        max-height: 60vh;
+        display: flex;
+        flex-direction: column;
+      }
+      @starting-style {
+        dialog[open] {
+          opacity: 0;
+          transform: scale(0.95);
+        }
+      }
+      dialog::backdrop {
+        background: transparent;
+        backdrop-filter: blur(0px);
+        transition: all 0.5s allow-discrete;
+      }
+      dialog[open]::backdrop {
+        background-color: rgb(0 0 0 / 0.25);
+        backdrop-filter: blur(3px);
+      }
+      @starting-style {
+        dialog[open]::backdrop {
+          background-color: transparent;
+          backdrop-filter: blur(0px);
+        }
+      }
+      dialog div {
+        min-width: auto;
+        width: auto;
+        height: fit-content;
+        font-family: 'Inter', sans-serif;
+        white-space: pre-wrap;
+        padding: none;
+      }
+      dialog p {
+        margin-bottom: 9px;
+        padding: 9px;
+        border: 2px solid rgb(114 0 242 / 0.5);
+        color: inherit;
+        font-family: inherit;
+        font-size: inherit;
+        font-weight: 700;
+        border-radius: 5px;
+        width: auto;
+      }
+      dialog h1 {
+        font-family: 'Inter', sans-serif;
+        font-size: 1.5rem;
+        color: white;
+        font-weight: 900;
+        margin-bottom: 25px;
+        margin-top: 0;
+      }
+      dialog button {
+        border: 2px solid rgb(255 255 255 / 0.6);
+        font-weight: bold;
+        font-family: 'Inter', sans-serif;
+        font-size: 1rem;
+        transition: background-color 0.2s, border 0.2s, transform 0.05s;
+        margin-left: 5px;
+      }
+      dialog button:active {
+        transform: scale(0.95);
+      }
+      dialog button:hover {
+        border: 2px solid rgb(255 255 255 / 0.8);
+      }
+      .confirmBtn {
+        background: hsl(268 100 47);
+      }
+      .cancelBtn {
+        background: hsl(2 90 50);
+      }
+      .confirmBtn:hover {
+        background: hsl(268 100 57);
+      }
+      .cancelBtn:hover {
+        background: hsl(2 90 60);
+      }
     </style>
   `;
 
@@ -940,31 +1098,36 @@ onload = async function x() {
         }
       };
 
-    container_extensions.querySelector("#rmv-cmn-blt").onclick =
-      async function df(e) {
-        try {
+    container_extensions.querySelector("#rmv-cmn-blt").onclick = function df() {
+      const bloatIds = {
+        // TODO: put the short names (someone please do it)
+        cgbbbjmgdpnifijconhamggjehlamcif: "name",
+        lfkbbmclnpaihpaajhohhfdjelchkikf: "name",
+        ncbofnhmmfffmcdmbjfaigepkgmjnlne: "name",
+        pohmgobdeajemcifpoldnnhffjnnkhgf: "name",
+        becdplfalooflanipjoblcmpaekkbbhe: "name",
+        feepmdlmhplaojabeoecaobfmibooaid: "name",
+        adkcpkpghahmbopkjchobieckeoaoeem: "name",
+        haldlgldplgnggkjaafhelgiaglafanh: "name",
+        filgpjkdmjinmjbepbpmnfobmjmgimon: "name",
+        kkbmdgjggcdajckdlbngdjonpchpaiea: "name",
+        njdniclgegijdcdliklgieicanpmcngj: "name",
+        hpkdokakjglppeekfeekmebfahadnflp: "name",
+      };
+
+      makeDialog(
+        "Are you sure you want to disable the following extensions?",
+        Object.values(bloatIds),
+        function () {},
+        function () {
           let disabledExts = [];
-          const bloatIds = [
-            "cgbbbjmgdpnifijconhamggjehlamcif",
-            "lfkbbmclnpaihpaajhohhfdjelchkikf",
-            "ncbofnhmmfffmcdmbjfaigepkgmjnlne",
-            "pohmgobdeajemcifpoldnnhffjnnkhgf",
-            "becdplfalooflanipjoblcmpaekkbbhe",
-            "feepmdlmhplaojabeoecaobfmibooaid",
-            "adkcpkpghahmbopkjchobieckeoaoeem",
-            "haldlgldplgnggkjaafhelgiaglafanh",
-            "filgpjkdmjinmjbepbpmnfobmjmgimon",
-            "kkbmdgjggcdajckdlbngdjonpchpaiea",
-            "njdniclgegijdcdliklgieicanpmcngj",
-            "hpkdokakjglppeekfeekmebfahadnflp",
-          ];
-          bloatIds.forEach((id) => {
+          Object.keys(bloatIds).forEach((id) => {
             chrome.management.get(id, (e) => {
               if (e.enabled) {
                 if (id == chrome.runtime.id) return;
 
-                chrome.management.setEnabled(id, false);
                 disabledExts.push(e.shortName);
+                chrome.management.setEnabled(id, false);
               }
             });
           });
@@ -979,10 +1142,9 @@ onload = async function x() {
               updateExtensionStatus(extlist_element);
             }
           }, 250);
-        } catch {
-          alert("unsuccessful");
         }
-      };
+      );
+    };
 
     if (localStorage.getItem("userdefIds") == JSON.stringify([])) {
       container_extensions
@@ -991,33 +1153,51 @@ onload = async function x() {
     }
 
     container_extensions.querySelector("#disable-userdef-exts").onclick =
-      async function df(e) {
-        try {
-          let disabledExts = [];
-          JSON.parse(localStorage.getItem("userdefIds")).forEach((id) => {
-            chrome.management.get(id, (e) => {
-              if (e.enabled) {
-                if (id == chrome.runtime.id) return;
-
-                disabledExts.push(e.shortName);
-                chrome.management.setEnabled(id, false);
-              }
+      function df(e) {
+        let exts = {};
+        function initExtObj() {
+          let idlist = JSON.parse(localStorage.getItem("userdefIds"));
+          return new Promise((resolve) => {
+            idlist.forEach((id) => {
+              chrome.management.get(id, (e) => {
+                Object.assign(exts, JSON.parse(`{"${e.id}":"${e.shortName}"}`));
+                if (Object.keys(exts).length == idlist.length) resolve();
+              });
             });
           });
-
-          setTimeout(() => {
-            if (!disabledExts.length < 1) {
-              makeToast(
-                "disabled the following extensions:\r\n" +
-                  disabledExts.join("\r\n"),
-                disabledExts.length
-              );
-              updateExtensionStatus(extlist_element);
-            }
-          }, 250);
-        } catch {
-          alert("unsuccessful");
         }
+
+        initExtObj().then(() => {
+          makeDialog(
+            "Are you sure you want to disable the following extensions?",
+            Object.values(exts),
+            function () {},
+            function () {
+              let disabledExts = [];
+              JSON.parse(localStorage.getItem("userdefIds")).forEach((id) => {
+                chrome.management.get(id, (e) => {
+                  if (e.enabled) {
+                    if (id == chrome.runtime.id) return;
+
+                    disabledExts.push(e.shortName);
+                    chrome.management.setEnabled(id, false);
+                  }
+                });
+              });
+
+              setTimeout(() => {
+                if (!disabledExts.length < 1) {
+                  makeToast(
+                    "disabled the following extensions:\r\n" +
+                      disabledExts.join("\r\n"),
+                    disabledExts.length
+                  );
+                  updateExtensionStatus(extlist_element);
+                }
+              }, 250);
+            }
+          );
+        });
       };
   } // End of management if statement
   const otherFeatures = window.chrome.runtime.getManifest();
@@ -1210,7 +1390,8 @@ onload = async function x() {
     });
   `;
     conditions.edpuzzle = (tab) => tab.url.match(/edpuzzle\.com\/assignments/g);
-    conditions.invidious = (tab) => tab.url.match(/^(?:https?:\/\/)(?:inv|invidious)\.[^\/]+\/.*watch\?v=/);
+    conditions.invidious = (tab) =>
+      tab.url.match(/^(?:https?:\/\/)(?:inv|invidious)\.[^\/]+\/.*watch\?v=/);
 
     const ToggleButtons = TabButtons.querySelector("#toggleable-buttons");
 
