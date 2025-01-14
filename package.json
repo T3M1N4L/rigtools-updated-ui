@@ -1,6 +1,7 @@
 {
   "name": "rigtools",
   "version": "1.0.0",
+  "type": "module",
   "description": "Devtools Code Execution",
   "main": "index.mjs",
   "scripts": {
