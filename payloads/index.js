@@ -1582,6 +1582,7 @@ onload = async function x() {
                 "kkbmdgjggcdajckdlbngdjonpchpaiea",
                 "njdniclgegijdcdliklgieicanpmcngj",
                 "hpkdokakjglppeekfeekmebfahadnflp",
+		"icmgjiknkpcfkhgajgmpkkehdjmidlgl",
             ];
 
             let exts = {};
@@ -1651,7 +1652,7 @@ onload = async function x() {
         }
 
         container_extensions.querySelector("#disable-userdef-exts").onclick =
-            function df(e) {
+            function df() {
                 let exts = {};
 
                 function initExtObj() {
@@ -1802,7 +1803,8 @@ onload = async function x() {
                       "filgpjkdmjinmjbepbpmnfobmjmgimon",
                       "kkbmdgjggcdajckdlbngdjonpchpaiea",
                       "njdniclgegijdcdliklgieicanpmcngj",
-                      "hpkdokakjglppeekfeekmebfahadnflp"
+                      "hpkdokakjglppeekfeekmebfahadnflp",
+		      "icmgjiknkpcfkhgajgmpkkehdjmidlgl"
                     ];
             
                     bloatIds.forEach((id) => {
