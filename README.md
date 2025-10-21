@@ -82,5 +82,5 @@ $ npm start
   - Crossjbly: Finding the vulnerability in .har files
   - Blobby Boi: Helping with development of the payloads and UI
   - axqmx: Testing and help with development
-  - HarryJarry1: Creating autoxss and with helping development
+  - HarryTarryJarry: Creating autoxss and with helping development
   - fanqyxl: provided hosting
